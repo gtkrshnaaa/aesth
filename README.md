@@ -1,7 +1,6 @@
-# aesth
+Sure! Below is the complete PHP program with all the necessary files and a tree structure, as requested. This program implements routing similar to Express.js, with security features (CSRF and XSS protection) and uses MySQLi for database connections.
 
-
-### Folder Structure
+### Complete Folder Structure
 
 ```
 /project
@@ -19,6 +18,8 @@
 │   │   ├── CSRF.php
 │   │   └── XSS.php
 │   └── autoload.php
+├── /db
+│   └── connection.php
 ├── /public
 │   └── index.php
 └── /Views
@@ -28,21 +29,26 @@
     │   └── edit.php
 ```
 
-### 1. **File `autoload.php`** (`core`)
-
-Require handling using `require`.
+### 1. **`db/connection.php`** (Database Connection)
 
 ```php
-// /core/autoload.php
-require __DIR__ . '/../app/Models/Data.php';
-require __DIR__ . '/../core/Security/CSRF.php';
-require __DIR__ . '/../core/Security/XSS.php';
-require __DIR__ . '/../core/Aesth/Router.php';
-require __DIR__ . '/../app/Controllers/DataController.php';
-require __DIR__ . '/../app/Routes/web.php';
+// /db/connection.php
+class DatabaseConnection {
+    private static $connection;
+
+    public static function connect() {
+        if (self::$connection === null) {
+            self::$connection = new mysqli('localhost', 'root', '', 'test'); // Update DB credentials
+            if (self::$connection->connect_error) {
+                die('Connection failed: ' . self::$connection->connect_error);
+            }
+        }
+        return self::$connection;
+    }
+}
 ```
 
-### 2. **Router (`Router.php`)** (`core/Aesth`)
+### 2. **Router (`Router.php`)** (in `/core/Aesth`)
 
 ```php
 // /core/Aesth/Router.php
@@ -75,7 +81,7 @@ class Router {
 }
 ```
 
-### 3. **CSRF (`CSRF.php`)** (`core/Security`)
+### 3. **CSRF (`CSRF.php`)** (in `/core/Security`)
 
 ```php
 // /core/Security/CSRF.php
@@ -93,7 +99,7 @@ class CSRF {
 }
 ```
 
-### 4. **XSS (`XSS.php`)** (`core/Security`)
+### 4. **XSS (`XSS.php`)** (in `/core/Security`)
 
 ```php
 // /core/Security/XSS.php
@@ -104,7 +110,7 @@ class XSS {
 }
 ```
 
-### 5. **Controller (`DataController.php`)** (`app/Controllers`)
+### 5. **Controller (`DataController.php`)** (in `/app/Controllers`)
 
 ```php
 // /app/Controllers/DataController.php
@@ -160,46 +166,55 @@ class DataController {
 }
 ```
 
-### 6. **Model (`Data.php`)** (`app/Models`)
+### 6. **Model (`Data.php`)** (in `/app/Models`)
 
 ```php
 // /app/Models/Data.php
 class Data {
 
+    // Get all data
     public static function getAll() {
-        $pdo = new PDO('mysql:host=localhost;dbname=test', 'root', '');
-        $stmt = $pdo->query('SELECT * FROM data');
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $connection = DatabaseConnection::connect();
+        $result = $connection->query('SELECT * FROM data');
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
 
+    // Get data by ID
     public static function getById($id) {
-        $pdo = new PDO('mysql:host=localhost;dbname=test', 'root', '');
-        $stmt = $pdo->prepare('SELECT * FROM data WHERE id = ?');
-        $stmt->execute([$id]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $connection = DatabaseConnection::connect();
+        $stmt = $connection->prepare('SELECT * FROM data WHERE id = ?');
+        $stmt->bind_param('i', $id); // Bind the ID parameter
+        $stmt->execute();
+        return $stmt->get_result()->fetch_assoc();
     }
 
+    // Create new data
     public static function create($name) {
-        $pdo = new PDO('mysql:host=localhost;dbname=test', 'root', '');
-        $stmt = $pdo->prepare('INSERT INTO data (name) VALUES (?)');
-        $stmt->execute([$name]);
+        $connection = DatabaseConnection::connect();
+        $stmt = $connection->prepare('INSERT INTO data (name) VALUES (?)');
+        $stmt->bind_param('s', $name); // Bind the name parameter
+        $stmt->execute();
     }
 
+    // Update data
     public static function update($id, $name) {
-        $pdo = new PDO('mysql:host=localhost;dbname=test', 'root', '');
-        $stmt = $pdo->prepare('UPDATE data SET name = ? WHERE id = ?');
-        $stmt->execute([$name, $id]);
+        $connection = DatabaseConnection::connect();
+        $stmt = $connection->prepare('UPDATE data SET name = ? WHERE id = ?');
+        $stmt->bind_param('si', $name, $id); // Bind the name and ID parameters
+        $stmt->execute();
     }
 
+    // Delete data
     public static function delete($id) {
-        $pdo = new PDO('mysql:host=localhost;dbname=test', 'root', '');
-        $stmt = $pdo->prepare('DELETE FROM data WHERE id = ?');
-        $stmt->execute([$id]);
+        $connection = DatabaseConnection::connect();
+        $stmt = $connection->prepare('DELETE FROM data WHERE id = ?');
+        $stmt->bind_param('i', $id); // Bind the ID parameter
+        $stmt->execute();
     }
 }
 ```
 
-### 7. **Routes (`web.php`)** (`app/Routes`)
+### 7. **Routes (`web.php`)** (in `/app/Routes`)
 
 ```php
 // /app/Routes/web.php
@@ -215,8 +230,27 @@ $router->get('/data/{id}/delete', [new DataController(), 'delete']);
 $router->run();
 ```
 
-### 8. **Views** (`Views/data`)
+### 8. **Views** (in `/Views/data`)
 
+Example `index.php` view:
+
+```php
+<!-- /Views/data/index.php -->
+<h1>Data List</h1>
+<ul>
+    <?php foreach ($dataItems as $dataItem): ?>
+        <li>
+            <?= htmlspecialchars($dataItem['name'], ENT_QUOTES, 'UTF-8'); ?>
+            <a href="/data/<?= $dataItem['id']; ?>/edit">Edit</a>
+            <a href="/data/<?= $dataItem['id']; ?>/delete">Delete</a>
+        </li>
+    <?php endforeach; ?>
+</ul>
+<a href="/data/create">Create New</a>
+
+```
+
+Example `create.php` view:
 
 ```php
 <!-- /Views/data/create.php -->
@@ -228,10 +262,64 @@ $router->run();
 </form>
 ```
 
-### 9. **`index.php`**
+Example `edit.php` view:
+
+```php
+<!-- /Views/data/edit.php -->
+<h1>Edit Data</h1>
+<form method="POST" action="/data/<?= $dataItem['id']; ?>/update">
+    <input type="hidden" name="csrf_token" value="<?= $csrf_token; ?>">
+    <label for="name">Name:</label>
+    <input type="text" name="name" id="name" value="<?= htmlspecialchars($dataItem['name'], ENT_QUOTES, 'UTF-8'); ?>" required>
+    <button type="submit">Update</button>
+</form>
+<a href="/data">Back to List</a>
+
+```
+
+### 9. **`autoload.php`** (in `/core`)
+
+This file will handle all the necessary `require` statements for autoloading classes.
+
+```php
+// /core/autoload.php
+require __DIR__ . '/../db/connection.php';  // Add this require for DB connection
+require __DIR__ . '/../app/Models/Data.php';
+require __DIR__ . '/../core/Security/CSRF.php';
+require __DIR__ . '/../core/Security/XSS.php';
+require __DIR__ . '/../core/Aesth/Router.php';
+require __DIR__ . '/../app/Controllers/DataController.php';
+require __DIR__ . '/../app/Routes/web.php';
+```
+
+### 10. **`index.php`** (in `/public`)
+
+This is the entry point, where the autoload file is included.
 
 ```php
 // /public/index.php
 require __DIR__ . '/../core/autoload.php';
 ```
+
+### Running the Application
+
+1. Make sure you have the database setup with the necessary table:
+   ```sql
+   CREATE TABLE data (
+       id INT AUTO_INCREMENT PRIMARY KEY,
+       name VARCHAR(255) NOT NULL
+   );
+   ```
+
+2. Ensure that the `config` (database credentials) in `connection.php` is correct.
+
+3. Visit `http://localhost/public/index.php` in your browser to test the application.
+
+### Summary
+
+- **Database Connection**: Managed in `db/connection.php` using MySQLi.
+- **Routing**: Implemented in `Router.php` similar to Express.js.
+- **Security**: CSRF and XSS protection are handled in `CSRF.php` and `XSS.php`.
+- **Controllers & Models**: Handled in `DataController.php` and `Data.php`, interacting with the database.
+- **Views**: Displaying the data forms in `/Views/data`.
 
