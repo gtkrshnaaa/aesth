@@ -1,3 +1,19 @@
 <?php
-// /public/index.php
-require __DIR__ . '/../core/autoload.php';
+
+// Start a session to enable CSRF token management
+session_start();
+
+// Define the root directory of the project
+define('BASE_PATH', dirname(__DIR__));
+
+// Autoload all necessary files
+require BASE_PATH . '/core/autoload.php';
+
+// Initialize and run the router
+$router = new Router();
+
+// Register routes
+require BASE_PATH . '/app/Routes/web.php';
+
+// Run the router to handle the incoming request
+$router->run();
