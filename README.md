@@ -1,6 +1,6 @@
-Sure! Below is the complete PHP program with all the necessary files and a tree structure, as requested. This program implements routing similar to Express.js, with security features (CSRF and XSS protection) and uses MySQLi for database connections.
+# AESTH
 
-### Complete Folder Structure
+### Folder Structure
 
 ```
 /project
@@ -19,7 +19,10 @@ Sure! Below is the complete PHP program with all the necessary files and a tree 
 │   │   └── XSS.php
 │   └── autoload.php
 ├── /db
-│   └── connection.php
+│   ├── connection.php
+│   └── /migrations
+│       ├── migrate_up.php
+│       └── migrate_down.php
 ├── /public
 │   └── index.php
 └── /Views
@@ -301,25 +304,69 @@ This is the entry point, where the autoload file is included.
 require __DIR__ . '/../core/autoload.php';
 ```
 
-### Running the Application
+---
 
-1. Make sure you have the database setup with the necessary table:
-   ```sql
-   CREATE TABLE data (
-       id INT AUTO_INCREMENT PRIMARY KEY,
-       name VARCHAR(255) NOT NULL
-   );
+### **Migration Files**
+
+#### 1. `migrate_up.php`
+This file is used to create the necessary tables and schema for your application.
+
+```php
+// /db/migrations/migrate_up.php
+require __DIR__ . '/../connection.php';
+
+$connection = DatabaseConnection::connect();
+
+// SQL query to create the "data" table
+$query = "CREATE TABLE IF NOT EXISTS data (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)";
+
+if ($connection->query($query)) {
+    echo "Table 'data' created successfully.\n";
+} else {
+    echo "Error creating table: " . $connection->error . "\n";
+}
+```
+
+#### 2. `migrate_down.php`
+This file is used to delete tables or roll back changes.
+
+```php
+// /db/migrations/migrate_down.php
+require __DIR__ . '/../connection.php';
+
+$connection = DatabaseConnection::connect();
+
+// SQL query to drop the "data" table
+$query = "DROP TABLE IF EXISTS data";
+
+if ($connection->query($query)) {
+    echo "Table 'data' dropped successfully.\n";
+} else {
+    echo "Error dropping table: " . $connection->error . "\n";
+}
+```
+
+---
+
+### Running the Migrations
+
+To execute the migrations, you can use the command line:
+
+1. Run the **migrate_up.php** file to create the tables:
+   ```bash
+   php db/migrations/migrate_up.php
    ```
 
-2. Ensure that the `config` (database credentials) in `connection.php` is correct.
+2. Run the **migrate_down.php** file to delete the tables:
+   ```bash
+   php db/migrations/migrate_down.php
+   ```
 
-3. Visit `http://localhost/public/index.php` in your browser to test the application.
 
-### Summary
-
-- **Database Connection**: Managed in `db/connection.php` using MySQLi.
-- **Routing**: Implemented in `Router.php` similar to Express.js.
-- **Security**: CSRF and XSS protection are handled in `CSRF.php` and `XSS.php`.
-- **Controllers & Models**: Handled in `DataController.php` and `Data.php`, interacting with the database.
-- **Views**: Displaying the data forms in `/Views/data`.
+---
 
