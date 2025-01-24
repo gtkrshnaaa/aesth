@@ -2,19 +2,21 @@
 // /app/Controllers/DataController.php
 
 require_once __DIR__ . '/../Models/Data.php';
-require_once __DIR__ . '/../core/Security/CSRF.php';
-require_once __DIR__ . '/../core/Security/XXS.php';
+require_once __DIR__ . '/../../core/Security/CSRF.php';
+require_once __DIR__ . '/../../core/Security/XSS.php';
+require_once __DIR__ . '/../../core/Aesth/Render.php';
+
 
 class DataController {
 
     public function index() {
         $dataItems = Data::getAll();
-        return $this->render('data/index.php', ['dataItems' => $dataItems]);
+        return Render::render('data/index.php', ['dataItems' => $dataItems]);
     }
 
     public function create() {
         $csrfToken = CSRF::generateToken();
-        return $this->render('data/create.php', ['csrf_token' => $csrfToken]);
+        return Render::render('data/create.php', ['csrf_token' => $csrfToken]);
     }
 
     public function store() {
@@ -30,7 +32,7 @@ class DataController {
     public function edit($id) {
         $dataItem = Data::getById($id);
         $csrfToken = CSRF::generateToken();
-        return $this->render('data/edit.php', ['dataItem' => $dataItem, 'csrf_token' => $csrfToken]);
+        return Render::render('data/edit.php', ['dataItem' => $dataItem, 'csrf_token' => $csrfToken]);
     }
 
     public function update($id) {
@@ -48,10 +50,4 @@ class DataController {
         header('Location: /data');
     }
 
-    private function render($view, $data = []) {
-        extract($data); // Extracting the data array into variables
-        ob_start();
-        require __DIR__ . '/../Views/' . $view;
-        return ob_get_clean();
-    }
 }
