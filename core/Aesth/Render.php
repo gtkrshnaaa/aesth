@@ -1,6 +1,7 @@
 <?php
 
 // /core/Aesth/Render.php
+
 class Render {
     public static function render($view, $data = []) {
         extract($data); // Extracting the data array into variables

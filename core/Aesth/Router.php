@@ -1,6 +1,7 @@
 <?php
 
 // /core/Aesth/Router.php
+
 class Router {
     private $routes = [];
 

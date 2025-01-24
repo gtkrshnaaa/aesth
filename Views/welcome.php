@@ -1,3 +1,5 @@
+<!-- Views/welcome.php -->
+ 
 <!DOCTYPE html>
 <html lang="en">
 <head>

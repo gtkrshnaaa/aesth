@@ -1,5 +1,7 @@
 <?php
+
 // /db/migrations/migrate_down.php
+
 require __DIR__ . '/../connection.php';
 
 $connection = DatabaseConnection::connect();

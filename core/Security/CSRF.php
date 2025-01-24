@@ -1,5 +1,7 @@
 <?php
+
 // /core/Security/CSRF.php
+
 class CSRF {
     public static function generateToken() {
         if (empty($_SESSION['csrf_token'])) {

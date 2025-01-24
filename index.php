@@ -1,5 +1,7 @@
 <?php
 
+// index.php
+
 // Enable error reporting for debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -11,7 +13,7 @@ session_start();
 define('BASE_PATH', dirname(__DIR__));
 
 // Include the routing setup
-require_once __DIR__ . '/../app/Routes/web.php';
+require_once __DIR__ . '/app/Routes/web.php';
 
 // Run the router to handle the incoming request
 $router->run();
