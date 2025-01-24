@@ -6,8 +6,6 @@ session_start();
 // Define the root directory of the project
 define('BASE_PATH', dirname(__DIR__));
 
-// Autoload all necessary files
-require BASE_PATH . '/core/autoload.php';
 
 // Initialize and run the router
 $router = new Router();

@@ -1,5 +1,8 @@
 <?php
 // /app/Models/Data.php
+
+require_once __DIR__ . '/../db/connection.php';
+
 class Data {
 
     // Get all data

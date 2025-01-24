@@ -1,6 +1,12 @@
 <?php
 // /app/Routes/web.php
+require_once __DIR__ . '/../core/Aesth/Router.php';
+
 $router = new Router();
+
+$router->get('/', function() {
+    echo "Welcome to AESTH!";
+});
 
 $router->get('/data', [new DataController(), 'index']);
 $router->get('/data/create', [new DataController(), 'create']);

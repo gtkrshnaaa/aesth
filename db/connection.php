@@ -4,12 +4,19 @@ class DatabaseConnection {
     private static $connection;
 
     public static function connect() {
-        if (self::$connection === null) {
-            self::$connection = new mysqli('localhost', 'root', '', 'test'); // Update DB credentials
-            if (self::$connection->connect_error) {
-                die('Connection failed: ' . self::$connection->connect_error);
+        try {
+            if (self::$connection === null) {
+                self::$connection = new mysqli('localhost', 'root', '', 'aesth');
+                if (self::$connection->connect_error) {
+                    throw new Exception('Connection failed: ' . self::$connection->connect_error);
+                }
+                echo "Successfully connected to the database.";
             }
+        } catch (Exception $e) {
+            echo $e->getMessage();
         }
         return self::$connection;
     }
 }
+
+DatabaseConnection::connect();

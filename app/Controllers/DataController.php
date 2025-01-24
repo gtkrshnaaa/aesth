@@ -1,5 +1,10 @@
 <?php
 // /app/Controllers/DataController.php
+
+require_once __DIR__ . '/../Models/Data.php';
+require_once __DIR__ . '/../core/Security/CSRF.php';
+require_once __DIR__ . '/../core/Security/XXS.php';
+
 class DataController {
 
     public function index() {

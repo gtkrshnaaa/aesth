@@ -17,7 +17,7 @@
 │   ├── /Security
 │   │   ├── CSRF.php
 │   │   └── XSS.php
-│   └── autoload.php
+│   
 ├── /db
 │   ├── connection.php
 │   └── /migrations
@@ -35,20 +35,29 @@
 ### 1. **`db/connection.php`** (Database Connection)
 
 ```php
+<?php
 // /db/connection.php
 class DatabaseConnection {
     private static $connection;
 
     public static function connect() {
-        if (self::$connection === null) {
-            self::$connection = new mysqli('localhost', 'root', '', 'test'); // Update DB credentials
-            if (self::$connection->connect_error) {
-                die('Connection failed: ' . self::$connection->connect_error);
+        try {
+            if (self::$connection === null) {
+                self::$connection = new mysqli('localhost', 'root', '', 'aesth');
+                if (self::$connection->connect_error) {
+                    throw new Exception('Connection failed: ' . self::$connection->connect_error);
+                }
+                echo "Successfully connected to the database.";
             }
+        } catch (Exception $e) {
+            echo $e->getMessage();
         }
         return self::$connection;
     }
 }
+
+DatabaseConnection::connect();
+
 ```
 
 ### 2. **Router (`Router.php`)** (in `/core/Aesth`)
@@ -116,7 +125,13 @@ class XSS {
 ### 5. **Controller (`DataController.php`)** (in `/app/Controllers`)
 
 ```php
+<?php
 // /app/Controllers/DataController.php
+
+require_once __DIR__ . '/../Models/Data.php';
+require_once __DIR__ . '/../core/Security/CSRF.php';
+require_once __DIR__ . '/../core/Security/XXS.php';
+
 class DataController {
 
     public function index() {
@@ -172,7 +187,11 @@ class DataController {
 ### 6. **Model (`Data.php`)** (in `/app/Models`)
 
 ```php
+<?php
 // /app/Models/Data.php
+
+require_once __DIR__ . '/../db/connection.php';
+
 class Data {
 
     // Get all data
@@ -220,7 +239,10 @@ class Data {
 ### 7. **Routes (`web.php`)** (in `/app/Routes`)
 
 ```php
+<?php
 // /app/Routes/web.php
+require_once __DIR__ . '/../core/Aesth/Router.php';
+
 $router = new Router();
 
 $router->get('/data', [new DataController(), 'index']);
@@ -280,34 +302,19 @@ Example `edit.php` view:
 
 ```
 
-### 9. **`autoload.php`** (in `/core`)
 
-This file will handle all the necessary `require` statements for autoloading classes.
+### 9. **`index.php`** (in `/public`)
 
-```php
-// /core/autoload.php
-require __DIR__ . '/../db/connection.php';  // Add this require for DB connection
-require __DIR__ . '/../app/Models/Data.php';
-require __DIR__ . '/../core/Security/CSRF.php';
-require __DIR__ . '/../core/Security/XSS.php';
-require __DIR__ . '/../core/Aesth/Router.php';
-require __DIR__ . '/../app/Controllers/DataController.php';
-require __DIR__ . '/../app/Routes/web.php';
-```
-
-### 10. **`index.php`** (in `/public`)
-
-This is the entry point, where the autoload file is included.
 
 ```php
+<?php
+
 // Start a session to enable CSRF token management
 session_start();
 
 // Define the root directory of the project
 define('BASE_PATH', dirname(__DIR__));
 
-// Autoload all necessary files
-require BASE_PATH . '/core/autoload.php';
 
 // Initialize and run the router
 $router = new Router();
@@ -317,6 +324,7 @@ require BASE_PATH . '/app/Routes/web.php';
 
 // Run the router to handle the incoming request
 $router->run();
+
 
 ```
 
