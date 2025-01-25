@@ -75,13 +75,20 @@ class Router {
     public function run() {
         $method = $_SERVER['REQUEST_METHOD'];
         $url = $_SERVER['REQUEST_URI'];
-
-        if (isset($this->routes[$method][$url])) {
-            call_user_func($this->routes[$method][$url]);
-        } else {
-            echo '404 Not Found';
+        $url = rtrim($url, '/'); // Remove trailing slash for consistency
+    
+        foreach ($this->routes[$method] as $route => $callback) {
+            $routePattern = preg_replace('/{[a-zA-Z0-9_]+}/', '([a-zA-Z0-9_]+)', $route);
+            if (preg_match('#^' . $routePattern . '$#', $url, $matches)) {
+                array_shift($matches); // Remove the full match
+                call_user_func_array($callback, $matches);
+                return;
+            }
         }
+        
+        echo '404 Not Found';
     }
+    
 }
 
 ```
@@ -208,7 +215,6 @@ class MigrateUp {
     }
 
     public function up() {
-        // SQL untuk membuat tabel
         $sql = "
         CREATE TABLE IF NOT EXISTS data (
             id INT(11) AUTO_INCREMENT PRIMARY KEY,
@@ -318,7 +324,6 @@ $router->get('/data/delete/{id}', function($id) { (new DataController())->delete
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($title) ? $title : 'My Mini Framework' ?></title>
-    <!-- Link ke Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 text-gray-900">
@@ -475,19 +480,16 @@ require_once __DIR__ . '/../../core/Render.php';
 
 class DataController {
 
-    // Menampilkan semua data
     public function index() {
         $dataModel = new Data();
         $data = $dataModel->getAll();
         Render::view('data/index', ['data' => $data]);
     }
 
-    // Menampilkan form untuk create
     public function create() {
         Render::view('data/create');
     }
 
-    // Menyimpan data baru
     public function store() {
         if ($_POST) {
             $name = $_POST['name'];
@@ -498,14 +500,12 @@ class DataController {
         }
     }
 
-    // Menampilkan form untuk edit
     public function edit($id) {
         $dataModel = new Data();
         $data = $dataModel->getById($id);
         Render::view('data/edit', ['data' => $data]);
     }
 
-    // Menyimpan perubahan data
     public function update($id) {
         if ($_POST) {
             $name = $_POST['name'];
@@ -516,7 +516,6 @@ class DataController {
         }
     }
 
-    // Menghapus data
     public function delete($id) {
         $dataModel = new Data();
         $dataModel->delete($id);
@@ -554,12 +553,10 @@ class Data {
     private $table = 'data';
 
     public function __construct() {
-        // Mendapatkan koneksi dari database
         $database = new Database();
         $this->conn = $database->connect();
     }
 
-    // Fungsi untuk mendapatkan semua data
     public function getAll() {
         $query = "SELECT * FROM " . $this->table;
         $stmt = $this->conn->prepare($query);
@@ -567,7 +564,6 @@ class Data {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Fungsi untuk menambahkan data
     public function store($name, $value) {
         $query = "INSERT INTO " . $this->table . " (name, value) VALUES (:name, :value)";
         $stmt = $this->conn->prepare($query);
@@ -576,7 +572,6 @@ class Data {
         return $stmt->execute();
     }
 
-    // Fungsi untuk mendapatkan data berdasarkan ID
     public function getById($id) {
         $query = "SELECT * FROM " . $this->table . " WHERE id = :id";
         $stmt = $this->conn->prepare($query);
@@ -585,7 +580,6 @@ class Data {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Fungsi untuk mengupdate data
     public function update($id, $name, $value) {
         $query = "UPDATE " . $this->table . " SET name = :name, value = :value WHERE id = :id";
         $stmt = $this->conn->prepare($query);
@@ -595,7 +589,6 @@ class Data {
         return $stmt->execute();
     }
 
-    // Fungsi untuk menghapus data
     public function delete($id) {
         $query = "DELETE FROM " . $this->table . " WHERE id = :id";
         $stmt = $this->conn->prepare($query);
