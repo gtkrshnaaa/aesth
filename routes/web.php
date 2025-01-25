@@ -9,6 +9,7 @@ require_once __DIR__ . '/../app/controllers/DataController.php';
 $router = new Router();
 
 $router->get('/', function() { (new HomeController())->index(); });
+
 $router->get('/data', function() { (new DataController())->index(); });
 $router->get('/data/create', function() { (new DataController())->create(); });
 $router->post('/data/create', function() { (new DataController())->store(); });

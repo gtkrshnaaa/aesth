@@ -15,13 +15,18 @@ class Router {
 
     public function run() {
         $method = $_SERVER['REQUEST_METHOD'];
-        $url = $_SERVER['REQUEST_URI'];
-        $url = rtrim($url, '/'); // Remove trailing slash for consistency
+        
+        $url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $url = rtrim($url, '/'); 
     
+        if ($url === '') {
+            $url = '/';
+        }
+        
         foreach ($this->routes[$method] as $route => $callback) {
             $routePattern = preg_replace('/{[a-zA-Z0-9_]+}/', '([a-zA-Z0-9_]+)', $route);
             if (preg_match('#^' . $routePattern . '$#', $url, $matches)) {
-                array_shift($matches); // Remove the full match
+                array_shift($matches); 
                 call_user_func_array($callback, $matches);
                 return;
             }
