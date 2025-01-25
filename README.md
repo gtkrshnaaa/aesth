@@ -97,13 +97,18 @@ class Router {
 
     public function run() {
         $method = $_SERVER['REQUEST_METHOD'];
-        $url = $_SERVER['REQUEST_URI'];
-        $url = rtrim($url, '/'); // Remove trailing slash for consistency
+        
+        $url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $url = rtrim($url, '/'); 
     
+        if ($url === '') {
+            $url = '/';
+        }
+        
         foreach ($this->routes[$method] as $route => $callback) {
             $routePattern = preg_replace('/{[a-zA-Z0-9_]+}/', '([a-zA-Z0-9_]+)', $route);
             if (preg_match('#^' . $routePattern . '$#', $url, $matches)) {
-                array_shift($matches); // Remove the full match
+                array_shift($matches); 
                 call_user_func_array($callback, $matches);
                 return;
             }
@@ -249,6 +254,7 @@ require_once __DIR__ . '/../app/controllers/DataController.php';
 $router = new Router();
 
 $router->get('/', function() { (new HomeController())->index(); });
+
 $router->get('/data', function() { (new DataController())->index(); });
 $router->get('/data/create', function() { (new DataController())->create(); });
 $router->post('/data/create', function() { (new DataController())->store(); });
@@ -262,7 +268,7 @@ $router->get('/data/delete/{id}', function($id) { (new DataController())->delete
 ```php
 <!-- app/views/layouts/footer.php -->
 
-<footer class="bg-gray-800 text-white p-4 text-center">
+<footer class="bg-[#161b22] text-[#c9d1d9] p-4 text-center mt-auto">
     <p>&copy; 2025 My Mini Framework. All Rights Reserved.</p>
 </footer>
 
@@ -283,21 +289,19 @@ $router->get('/data/delete/{id}', function($id) { (new DataController())->delete
     <title><?= isset($title) ? $title : 'My Mini Framework' ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 text-gray-900">
+<body class="bg-[#0d1117] text-[#c9d1d9] flex flex-col min-h-screen">
 
-<header class="bg-blue-600 text-white p-4">
+<header class="bg-[#161b22] text-[#c9d1d9] p-4">
     <div class="container mx-auto flex justify-between items-center">
         <h1 class="text-xl font-bold">My Mini Framework</h1>
         <nav>
             <ul class="flex space-x-6">
-                <li><a href="/" class="hover:text-gray-300">Home</a></li>
-                <li><a href="/data" class="hover:text-gray-300">Data</a></li>
+                <li><a href="/" class="hover:text-[#58a6ff]">Home</a></li>
+                <li><a href="/data" class="hover:text-[#58a6ff]">Data</a></li>
             </ul>
         </nav>
     </div>
 </header>
-
-<main class="container mx-auto p-6">
 
 ```
 
@@ -311,9 +315,18 @@ $router->get('/data/delete/{id}', function($id) { (new DataController())->delete
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?></title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h1><?= $title ?></h1>
+<body class="bg-[#0d1117] text-[#c9d1d9] h-screen flex items-center justify-center">
+    <div class="text-center">
+        <h1 class="text-4xl font-bold text-[#c9d1d9] mb-4"><?= $title ?></h1>
+        <p class="text-lg text-[#8b949e] mb-6">
+            This is the home page. Click the button below to explore the CRUD demo.
+        </p>
+        <a href="/data" class="bg-[#238636] text-white px-4 py-2 rounded mb-4 inline-block">
+            See CRUD Demo
+        </a>
+    </div>
 </body>
 </html>
 
@@ -328,33 +341,36 @@ $router->get('/data/delete/{id}', function($id) { (new DataController())->delete
 include __DIR__ . '/../layouts/header.php';
 ?>
 
-<h2 class="text-2xl font-semibold mb-6">Data List</h2>
+<main class="container mx-auto p-6 flex-grow">
+    <h2 class="text-2xl font-semibold mb-6">Data List</h2>
 
-<a href="/data/create" class="bg-blue-500 text-white px-4 py-2 rounded mb-4 inline-block">Add New Data</a>
+    <a href="/data/create" class="bg-[#238636] text-white px-4 py-2 rounded mb-4 inline-block">Add New Data</a>
 
-<table class="min-w-full table-auto bg-white rounded-lg shadow-md">
-    <thead>
-        <tr class="border-b">
-            <th class="px-4 py-2 text-left">ID</th>
-            <th class="px-4 py-2 text-left">Name</th>
-            <th class="px-4 py-2 text-left">Value</th>
-            <th class="px-4 py-2 text-left">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php foreach ($data as $item): ?>
-            <tr class="border-b">
-                <td class="px-4 py-2"><?= $item['id'] ?></td>
-                <td class="px-4 py-2"><?= $item['name'] ?></td>
-                <td class="px-4 py-2"><?= $item['value'] ?></td>
-                <td class="px-4 py-2">
-                    <a href="/data/edit/<?= $item['id'] ?>" class="text-yellow-500 hover:text-yellow-700">Edit</a> |
-                    <a href="/data/delete/<?= $item['id'] ?>" class="text-red-500 hover:text-red-700">Delete</a>
-                </td>
+    <table class="min-w-full table-auto bg-[#161b22] rounded-lg shadow-md">
+        <thead>
+            <tr class="border-b border-[#30363d]">
+                <th class="px-4 py-2 text-left">ID</th>
+                <th class="px-4 py-2 text-left">Name</th>
+                <th class="px-4 py-2 text-left">Value</th>
+                <th class="px-4 py-2 text-left">Actions</th>
             </tr>
-        <?php endforeach; ?>
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            <?php foreach ($data as $item): ?>
+                <tr class="border-b border-[#30363d]">
+                    <td class="px-4 py-2"><?= $item['id'] ?></td>
+                    <td class="px-4 py-2"><?= $item['name'] ?></td>
+                    <td class="px-4 py-2"><?= $item['value'] ?></td>
+                    <td class="px-4 py-2">
+                        <a href="/data/edit/<?= $item['id'] ?>" class="text-[#58a6ff] hover:text-[#c9d1d9]">Edit</a> |
+                        <a href="/data/delete/<?= $item['id'] ?>" class="text-red-500 hover:text-red-700">Delete</a>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</main>
+
 
 <?php
 // Include Footer
@@ -372,21 +388,23 @@ include __DIR__ . '/../layouts/footer.php';
 include __DIR__ . '/../layouts/header.php';
 ?>
 
-<h2 class="text-2xl font-semibold mb-6">Create New Data</h2>
+<main class="container mx-auto p-6 flex-grow">
+    <h2 class="text-2xl font-semibold mb-6">Create New Data</h2>
 
-<form action="/data/create" method="POST" class="bg-white p-6 rounded-lg shadow-md">
-    <div class="mb-4">
-        <label for="name" class="block text-lg font-medium text-gray-700">Name</label>
-        <input type="text" id="name" name="name" class="w-full p-2 border border-gray-300 rounded-lg" required>
-    </div>
-    <div class="mb-4">
-        <label for="value" class="block text-lg font-medium text-gray-700">Value</label>
-        <input type="text" id="value" name="value" class="w-full p-2 border border-gray-300 rounded-lg" required>
-    </div>
-    <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-lg">Create</button>
-</form>
+    <form action="/data/create" method="POST" class="bg-[#161b22] p-6 rounded-lg shadow-md">
+        <div class="mb-4">
+            <label for="name" class="block text-lg font-medium text-[#c9d1d9]">Name</label>
+            <input type="text" id="name" name="name" class="w-full p-2 border border-[#30363d] rounded-lg bg-[#0d1117] text-[#c9d1d9]" required>
+        </div>
+        <div class="mb-4">
+            <label for="value" class="block text-lg font-medium text-[#c9d1d9]">Value</label>
+            <input type="text" id="value" name="value" class="w-full p-2 border border-[#30363d] rounded-lg bg-[#0d1117] text-[#c9d1d9]" required>
+        </div>
+        <button type="submit" class="bg-[#238636] text-white px-6 py-2 rounded-lg">Create</button>
+    </form>
 
-<a href="/data" class="mt-4 inline-block text-blue-500">Back to Data List</a>
+    <a href="/data" class="mt-4 inline-block text-[#58a6ff] hover:text-[#c9d1d9]">Back to Data List</a>
+</main>
 
 <?php
 // Include Footer
@@ -404,21 +422,23 @@ include __DIR__ . '/../layouts/footer.php';
 include __DIR__ . '/../layouts/header.php';
 ?>
 
-<h2 class="text-2xl font-semibold mb-6">Edit Data</h2>
+<main class="container mx-auto p-6 flex-grow">
+    <h2 class="text-2xl font-semibold mb-6">Edit Data</h2>
 
-<form action="/data/edit/<?= $data['id'] ?>" method="POST" class="bg-white p-6 rounded-lg shadow-md">
-    <div class="mb-4">
-        <label for="name" class="block text-lg font-medium text-gray-700">Name</label>
-        <input type="text" id="name" name="name" value="<?= $data['name'] ?>" class="w-full p-2 border border-gray-300 rounded-lg" required>
-    </div>
-    <div class="mb-4">
-        <label for="value" class="block text-lg font-medium text-gray-700">Value</label>
-        <input type="text" id="value" name="value" value="<?= $data['value'] ?>" class="w-full p-2 border border-gray-300 rounded-lg" required>
-    </div>
-    <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-lg">Update</button>
-</form>
+    <form action="/data/edit/<?= $data['id'] ?>" method="POST" class="bg-[#161b22] p-6 rounded-lg shadow-md">
+        <div class="mb-4">
+            <label for="name" class="block text-lg font-medium text-[#c9d1d9]">Name</label>
+            <input type="text" id="name" name="name" value="<?= $data['name'] ?>" class="w-full p-2 border border-[#30363d] rounded-lg bg-[#0d1117] text-[#c9d1d9]" required>
+        </div>
+        <div class="mb-4">
+            <label for="value" class="block text-lg font-medium text-[#c9d1d9]">Value</label>
+            <input type="text" id="value" name="value" value="<?= $data['value'] ?>" class="w-full p-2 border border-[#30363d] rounded-lg bg-[#0d1117] text-[#c9d1d9]" required>
+        </div>
+        <button type="submit" class="bg-[#238636] text-white px-6 py-2 rounded-lg">Update</button>
+    </form>
 
-<a href="/data" class="mt-4 inline-block text-blue-500">Back to Data List</a>
+    <a href="/data" class="mt-4 inline-block text-[#58a6ff] hover:text-[#c9d1d9]">Back to Data List</a>
+</main>
 
 <?php
 // Include Footer
@@ -492,7 +512,7 @@ require_once __DIR__ . '/../../core/Render.php';
 
 class HomeController {
     public function index() {
-        Render::view('home', ['title' => 'Welcome to My Mini Framework']);
+        Render::view('home', ['title' => 'Welcome to Aesth Framework']);
     }
 }
 

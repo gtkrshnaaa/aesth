@@ -90,13 +90,18 @@ class Router {
 
     public function run() {
         $method = $_SERVER['REQUEST_METHOD'];
-        $url = $_SERVER['REQUEST_URI'];
-        $url = rtrim($url, '/'); // Remove trailing slash for consistency
+        
+        $url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $url = rtrim($url, '/'); 
     
+        if ($url === '') {
+            $url = '/';
+        }
+        
         foreach ($this->routes[$method] as $route => $callback) {
             $routePattern = preg_replace('/{[a-zA-Z0-9_]+}/', '([a-zA-Z0-9_]+)', $route);
             if (preg_match('#^' . $routePattern . '$#', $url, $matches)) {
-                array_shift($matches); // Remove the full match
+                array_shift($matches); 
                 call_user_func_array($callback, $matches);
                 return;
             }
@@ -242,6 +247,7 @@ require_once __DIR__ . '/../app/controllers/DataController.php';
 $router = new Router();
 
 $router->get('/', function() { (new HomeController())->index(); });
+
 $router->get('/data', function() { (new DataController())->index(); });
 $router->get('/data/create', function() { (new DataController())->create(); });
 $router->post('/data/create', function() { (new DataController())->store(); });
@@ -302,9 +308,18 @@ $router->get('/data/delete/{id}', function($id) { (new DataController())->delete
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?></title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h1><?= $title ?></h1>
+<body class="bg-[#0d1117] text-[#c9d1d9] h-screen flex items-center justify-center">
+    <div class="text-center">
+        <h1 class="text-4xl font-bold text-[#c9d1d9] mb-4"><?= $title ?></h1>
+        <p class="text-lg text-[#8b949e] mb-6">
+            This is the home page. Click the button below to explore the CRUD demo.
+        </p>
+        <a href="/data" class="bg-[#238636] text-white px-4 py-2 rounded mb-4 inline-block">
+            See CRUD Demo
+        </a>
+    </div>
 </body>
 </html>
 
@@ -490,7 +505,7 @@ require_once __DIR__ . '/../../core/Render.php';
 
 class HomeController {
     public function index() {
-        Render::view('home', ['title' => 'Welcome to My Mini Framework']);
+        Render::view('home', ['title' => 'Welcome to Aesth Framework']);
     }
 }
 
