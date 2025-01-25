@@ -48,7 +48,7 @@ $dirPath = './'; // Specify the directory path to scan
 $outputFile = 'file_list.md'; // Specify the name of the output Markdown file
 
 // List of files or extensions to exclude
-$excludeFiles = ['mdgenerator.php', 'file_list.md', 'README.md', 'exe']; // Can be file names or extensions
+$excludeFiles = ['filelistmdgenerator.php', 'file_list.md', 'README.md', 'exe']; // Can be file names or extensions
 $excludeFolders = ['node_modules', '.git', 'vendor']; // List of folders to exclude
 
 // Create a header for the Markdown file

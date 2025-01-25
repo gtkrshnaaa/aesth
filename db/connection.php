@@ -2,13 +2,12 @@
 // db/connection.php
 
 class Database {
-    private $host = 'localhost'; // Ganti dengan host database kamu
-    private $db_name = 'aesth'; // Ganti dengan nama database kamu
-    private $username = 'root'; // Ganti dengan username database kamu
-    private $password = ''; // Ganti dengan password database kamu
+    private $host = 'localhost'; 
+    private $db_name = 'aesth'; 
+    private $username = 'root'; 
+    private $password = ''; 
     private $conn;
 
-    // Koneksi ke database
     public function connect() {
         $this->conn = null;
 
