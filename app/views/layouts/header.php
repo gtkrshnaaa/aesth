@@ -8,18 +8,16 @@
     <title><?= isset($title) ? $title : 'My Mini Framework' ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 text-gray-900">
+<body class="bg-[#0d1117] text-[#c9d1d9] flex flex-col min-h-screen">
 
-<header class="bg-blue-600 text-white p-4">
+<header class="bg-[#161b22] text-[#c9d1d9] p-4">
     <div class="container mx-auto flex justify-between items-center">
         <h1 class="text-xl font-bold">My Mini Framework</h1>
         <nav>
             <ul class="flex space-x-6">
-                <li><a href="/" class="hover:text-gray-300">Home</a></li>
-                <li><a href="/data" class="hover:text-gray-300">Data</a></li>
+                <li><a href="/" class="hover:text-[#58a6ff]">Home</a></li>
+                <li><a href="/data" class="hover:text-[#58a6ff]">Data</a></li>
             </ul>
         </nav>
     </div>
 </header>
-
-<main class="container mx-auto p-6">
