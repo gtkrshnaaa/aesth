@@ -9,23 +9,39 @@ Aesth is a simple PHP framework that follows the MVC (Model-View-Controller) pat
 
 ## tree.txt
 ```txt
-.
+aesth
 ├── app
-│   ├── controllers
-│   │   └── HomeController.php
-│   └── views
-│       └── home.php
+│   ├── controllers
+│   │   ├── DataController.php
+│   │   └── HomeController.php
+│   ├── models
+│   │   └── Data.php
+│   └── views
+│       ├── data
+│       │   ├── create.php
+│       │   ├── edit.php
+│       │   └── index.php
+│       ├── home.php
+│       └── layouts
+│           ├── footer.php
+│           └── header.php
 ├── core
-│   ├── Render.php
-│   └── Router.php
+│   ├── Render.php
+│   └── Router.php
+├── db
+│   ├── connection.php
+│   └── migrations
+│       ├── migratedown.php
+│       └── migrateup.php
 ├── file_list.md
-├── mdgenerator.php
+├── filelistmdgenerator.php
 ├── public
-│   └── index.php
+│   └── index.php
 ├── README.md
 ├── routes
-│   └── web.php
+│   └── web.php
 └── tree.txt
+
 
 ```
 
